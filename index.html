@@ -407,18 +407,35 @@
 
     <!-- Embedded AI Approval Odds -->
     <div style="border-top:1px solid var(--border);padding-top:20px;margin-top:4px">
-      <h3 style="font-size:1rem;font-weight:700;margin-bottom:16px"><i class="fa-solid fa-robot" style="color:var(--purple)"></i> Loan Approval Odds <span style="font-size:0.74rem;color:var(--text-muted);font-weight:400">— automated assessment</span></h3>
+      <h3 style="font-size:1rem;font-weight:700;margin-bottom:16px"><i class="fa-solid fa-robot" style="color:var(--purple)"></i> Loan Approval Odds <span style="font-size:0.74rem;color:var(--text-muted);font-weight:400">— 10-factor AI assessment</span></h3>
       <div class="two-col">
         <div>
-          <div class="form-group"><label>Credit Score</label><div class="input-wrapper"><input type="number" id="approvalCredit" value="680" min="300" max="850" step="1"></div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="form-group"><label>Credit Score</label><div class="input-wrapper"><input type="number" id="approvalCredit" value="680" min="300" max="850" step="1"></div></div>
+            <div class="form-group"><label>Credit History Age</label><div class="input-wrapper"><input type="number" id="approvalCreditAge" value="8" min="0" max="50" step="1"><span class="input-suffix">yr</span></div></div>
+          </div>
           <input type="range" id="approvalCreditSlider" min="300" max="850" value="680" step="5" style="--pct:45%">
           <div class="slider-labels"><span>300</span><span>850</span></div>
-          <div class="form-group"><label>Employment</label>
-            <select id="approvalEmploy"><option value="ft">Full-time (2+ years)</option><option value="ft1">Full-time (1-2 years)</option><option value="self">Self-employed</option><option value="pt">Part-time / Contract</option></select></div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div class="form-group"><label>Down Payment %</label><div class="input-wrapper"><input type="number" id="approvalDown" value="20" min="0" max="100" step="1"><span class="input-suffix">%</span></div></div>
+            <div class="form-group"><label>Employment</label>
+              <select id="approvalEmploy"><option value="ft">Full-time (2+ yr)</option><option value="ft1">Full-time (1-2 yr)</option><option value="self">Self-employed</option><option value="pt">Part-time / Contract</option></select></div>
+            <div class="form-group"><label>Property Type</label>
+              <select id="approvalPropType"><option value="primary">Primary Residence</option><option value="second">Second Home</option><option value="invest">Investment Property</option></select></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="form-group"><label>Down Payment</label><div class="input-wrapper"><input type="number" id="approvalDown" value="20" min="0" max="100" step="1"><span class="input-suffix">%</span></div></div>
             <div class="form-group"><label>Loan Type</label><select id="approvalType"><option value="conventional">Conventional</option><option value="fha">FHA</option><option value="va">VA</option></select></div>
           </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="form-group"><label>Cash Reserves (after closing)</label><div class="input-wrapper"><input type="number" id="approvalReserves" value="6" min="0" max="60" step="1"><span class="input-suffix">mo</span></div></div>
+            <div class="form-group"><label>Recent Inquiries (12 mo)</label><div class="input-wrapper"><input type="number" id="approvalInquiries" value="1" min="0" max="20" step="1"></div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="form-group"><label>Monthly Debts</label><div class="input-wrapper"><span class="input-prefix">$</span><input type="text" id="approvalDebts" class="has-prefix" value="500" inputmode="numeric" autocomplete="off"></div></div>
+            <div class="form-group"><label>Monthly Income</label><div class="input-wrapper"><span class="input-prefix">$</span><input type="text" id="approvalIncome" class="has-prefix" value="8,333" inputmode="numeric" autocomplete="off"></div></div>
+          </div>
+          <div class="form-group"><label>Bankruptcy / Foreclosure History</label>
+            <select id="approvalAdverse"><option value="none">None</option><option value="bk7_old">Bankruptcy discharged &gt;4 yr ago</option><option value="bk7_recent">Bankruptcy discharged 2-4 yr ago</option><option value="fc_recent">Foreclosure &lt;7 yr ago</option></select></div>
         </div>
         <div class="score-meter" id="scoreMeter">
           <div class="score-circle">
@@ -1023,35 +1040,105 @@ function calcAfford(){
 }
 calcAfford();
 
-// ═══════════════ AI APPROVAL SCORING ═══════════════
+// ═══════════════ AI APPROVAL SCORING (10-factor model) ═══════════════
 document.getElementById('calcApprovalBtn').addEventListener('click',calcApproval);
 document.getElementById('approvalCredit').addEventListener('input',function(){document.getElementById('approvalCreditSlider').value=this.value;updateSliderPct(document.getElementById('approvalCreditSlider'))});
 document.getElementById('approvalCreditSlider').addEventListener('input',function(){document.getElementById('approvalCredit').value=this.value;updateSliderPct(this);calcApproval()});
+document.getElementById('approvalDebts').addEventListener('input',function(){this.value=fmtNumInp(this.value)});
+document.getElementById('approvalIncome').addEventListener('input',function(){this.value=fmtNumInp(this.value)});
 function updateSliderPct(sl){sl.style.setProperty('--pct',((sl.value-sl.min)/(sl.max-sl.min)*100)+'%')}
+
 function calcApproval(){
-  const credit=parseInt(document.getElementById('approvalCredit').value)||680;
-  const employ=document.getElementById('approvalEmploy').value;
-  const downPct=parseFloat(document.getElementById('approvalDown').value)||20;
-  const loanType=document.getElementById('approvalType').value;
-  let cs,es,ds,ts=65,tb=0;
-  if(credit>=740)cs=100;else if(credit>=700)cs=85;else if(credit>=660)cs=65;else if(credit>=620)cs=45;else if(credit>=580)cs=25;else if(credit>=500)cs=10;else cs=0;
-  if(employ==='ft')es=95;else if(employ==='ft1')es=75;else if(employ==='self')es=55;else es=35;
-  if(downPct>=20)ds=100;else if(downPct>=10)ds=80;else if(downPct>=5)ds=55;else if(downPct>=3.5)ds=35;else if(downPct>=3)ds=20;else ds=5;
-  if(loanType==='va')tb=15;else if(loanType==='fha')tb=8;
-  const w={credit:0.35,employ:0.15,down:0.20,dti:0.20,type:0.10};
-  let total=cs*w.credit+es*w.employ+ds*w.down+ts*w.dti+tb*w.type;
+  // ── Collect all inputs ──
+  var credit=parseInt(document.getElementById('approvalCredit').value)||680;
+  var creditAge=parseFloat(document.getElementById('approvalCreditAge').value)||8;
+  var employ=document.getElementById('approvalEmploy').value;
+  var propType=document.getElementById('approvalPropType').value;
+  var downPct=parseFloat(document.getElementById('approvalDown').value)||20;
+  var loanType=document.getElementById('approvalType').value;
+  var reserves=parseFloat(document.getElementById('approvalReserves').value)||6;
+  var inquiries=parseInt(document.getElementById('approvalInquiries').value)||1;
+  var debts=toNum(document.getElementById('approvalDebts').value)||500;
+  var income=toNum(document.getElementById('approvalIncome').value)||8333;
+  var adverse=document.getElementById('approvalAdverse').value;
+
+  // ── Factor Scoring (0-100 each) ──
+  // 1. Credit Score (weight: 25%)
+  var cs;
+  if(credit>=760)cs=100;else if(credit>=740)cs=92;else if(credit>=700)cs=78;else if(credit>=680)cs=60;else if(credit>=660)cs=45;else if(credit>=640)cs=32;else if(credit>=620)cs=20;else if(credit>=580)cs=12;else if(credit>=500)cs=5;else cs=0;
+
+  // 2. DTI Ratio (weight: 18%) — back-end DTI = (debts + estimated PITI) / income
+  var estPITI=income*0.28; // assume 28% front-end
+  var backDTI=income>0?(debts+estPITI)/income*100:100;
+  var dtiScore;
+  if(backDTI<=28)dtiScore=100;else if(backDTI<=33)dtiScore=88;else if(backDTI<=36)dtiScore=75;else if(backDTI<=40)dtiScore=58;else if(backDTI<=43)dtiScore=40;else if(backDTI<=50)dtiScore=18;else dtiScore=5;
+
+  // 3. Down Payment / LTV (weight: 15%)
+  var ds;
+  if(downPct>=25)ds=100;else if(downPct>=20)ds=92;else if(downPct>=15)ds=78;else if(downPct>=10)ds=58;else if(downPct>=5)ds=35;else if(downPct>=3.5)ds=20;else if(downPct>=3)ds=12;else ds=3;
+
+  // 4. Employment Stability (weight: 10%)
+  var es;
+  if(employ==='ft')es=95;else if(employ==='ft1')es=70;else if(employ==='self')es=50;else es=30;
+
+  // 5. Cash Reserves (weight: 8%)
+  var rs;
+  if(reserves>=12)rs=100;else if(reserves>=6)rs=88;else if(reserves>=3)rs=65;else if(reserves>=2)rs=40;else if(reserves>=1)rs=20;else rs=5;
+
+  // 6. Credit History Age (weight: 6%)
+  var ca;
+  if(creditAge>=15)ca=100;else if(creditAge>=10)ca=88;else if(creditAge>=7)ca=72;else if(creditAge>=5)ca=55;else if(creditAge>=3)ca=35;else if(creditAge>=1)ca=18;else ca=5;
+
+  // 7. Recent Inquiries (weight: 4%)
+  var iq;
+  if(inquiries<=1)iq=100;else if(inquiries<=2)iq=82;else if(inquiries<=3)iq=60;else if(inquiries<=4)iq=38;else if(inquiries<=6)iq=18;else iq=5;
+
+  // 8. Property Type (weight: 4%)
+  var pt;
+  if(propType==='primary')pt=95;else if(propType==='second')pt=70;else pt=45;
+
+  // 9. Adverse Events (weight: 6%)
+  var av;
+  if(adverse==='none')av=100;else if(adverse==='bk7_old')av=55;else if(adverse==='bk7_recent')av=20;else av=5;
+
+  // 10. Loan Type Bonus (weight: 4%)
+  var lt=0;
+  if(loanType==='va')lt=20;else if(loanType==='fha')lt=12;else lt=0;
+
+  // ── Weighted Total ──
+  var total=cs*0.25+dtiScore*0.18+ds*0.15+es*0.10+rs*0.08+ca*0.06+iq*0.04+pt*0.04+av*0.06+lt*0.04;
   total=Math.min(99,Math.max(5,Math.round(total)));
-  const circle=document.getElementById('scoreCircle'),circ=377,offset=circ*(1-total/100);
+
+  // ── Render score circle ──
+  var circle=document.getElementById('scoreCircle'),circ=377,offset=circ*(1-total/100);
   circle.setAttribute('stroke-dashoffset',offset);
   circle.setAttribute('stroke',total>=70?'#10B981':total>=40?'#F59E0B':'#EF4444');
   document.getElementById('scorePercent').textContent=total+'%';
   document.getElementById('scorePercent').style.color=total>=70?'#10B981':total>=40?'#F59E0B':'#EF4444';
-  const factors=[{label:'Credit Score',score:cs},{label:'Employment',score:es},{label:'Down Payment',score:ds},{label:'DTI Profile',score:ts}];
-  document.getElementById('scoreFactors').innerHTML=factors.map(function(f){return'<div class="score-factor"><span>'+f.label+'</span><div class="bar"><div class="bar-fill" style="width:'+f.score+'%;background:'+(f.score>=70?'#10B981':f.score>=40?'#F59E0B':'#EF4444')+'"></div></div><span class="score-val">'+f.score+'</span></div>'}).join('');
-  const insight=document.getElementById('scoreInsight');let msg,cls;
-  if(total>=70){msg='<i class="fa-solid fa-circle-check"></i> <span><strong>Strong application.</strong> You meet or exceed typical requirements. Shop multiple lenders for the best rate.</span>';cls='success'}
-  else if(total>=40){msg='<i class="fa-solid fa-circle-info"></i> <span><strong>Fair chance.</strong> You may qualify but expect higher rates. Improve your credit score or increase your down payment.</span>';cls='info'}
-  else{msg='<i class="fa-solid fa-triangle-exclamation"></i> <span><strong>Challenging.</strong> Your profile falls below typical minimums. Consider FHA loans (min 580 credit) or a larger down payment.</span>';cls='warning'}
+
+  // ── Factor bars ──
+  var factors=[
+    {label:'Credit Score',score:cs,weight:25},
+    {label:'DTI Ratio',score:dtiScore,weight:18},
+    {label:'Down Payment',score:ds,weight:15},
+    {label:'Employment',score:es,weight:10},
+    {label:'Cash Reserves',score:rs,weight:8},
+    {label:'Credit Age',score:ca,weight:6},
+    {label:'Inquiries',score:iq,weight:4},
+    {label:'Property Type',score:pt,weight:4},
+    {label:'Adverse Hx',score:av,weight:6},
+  ];
+  document.getElementById('scoreFactors').innerHTML=factors.map(function(f){
+    var barW=Math.round(f.score*f.weight/25); // scale to row width
+    return'<div class="score-factor"><span>'+f.label+'</span><div class="bar"><div class="bar-fill" style="width:'+f.score+'%;background:'+(f.score>=70?'#10B981':f.score>=40?'#F59E0B':'#EF4444')+'"></div></div><span class="score-val">'+f.score+'</span></div>';
+  }).join('');
+
+  // ── Insight ──
+  var insight=document.getElementById('scoreInsight'),msg,cls;
+  if(total>=75){msg='<i class="fa-solid fa-circle-check"></i> <span><strong>Excellent application.</strong> You are highly likely to qualify with competitive rates. Compare offers from 3+ lenders.</span>';cls='success'}
+  else if(total>=55){msg='<i class="fa-solid fa-circle-check"></i> <span><strong>Good application.</strong> You should qualify with most lenders. May face slightly higher rates depending on the weakest factor above.</span>';cls='success'}
+  else if(total>=35){msg='<i class="fa-solid fa-circle-info"></i> <span><strong>Fair application.</strong> You may qualify but expect stricter terms. Focus on improving the lowest-scoring factors before applying.</span>';cls='info'}
+  else{msg='<i class="fa-solid fa-triangle-exclamation"></i> <span><strong>Needs work.</strong> Your profile falls below typical minimums. Consider FHA loans (580+ credit), reducing debt, saving a larger down payment, or waiting for adverse events to age off your report.</span>';cls='warning'}
   insight.className='insight-box '+cls;insight.innerHTML=msg;
   document.getElementById('approvalCreditSlider').value=credit;updateSliderPct(document.getElementById('approvalCreditSlider'));
 }
