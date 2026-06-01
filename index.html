@@ -286,6 +286,26 @@
 
   input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
   input[type="number"]{-moz-appearance:textfield}
+
+  /* ── Print / PDF Export ── */
+  @media print{
+    body{background:#fff!important;padding:0!important}
+    .header,.tab-nav,.footer,.email-gate,.modal-overlay,#emailGate,
+    #extraPaymentToggle~.collapsible-body,#extraPaymentToggle,.collapsible-header,
+    #approvalCreditSlider,.slider-labels,#calcApprovalBtn,
+    input[type="range"],.btn-outline,#toggleTableBtn,.pdf-hide{display:none!important}
+    .card{box-shadow:none!important;border:1px solid #ddd!important;page-break-inside:avoid;padding:16px 20px!important}
+    .container{max-width:100%!important;gap:12px!important}
+    #mainChartCard{page-break-before:avoid}
+    #mainChartBox{height:280px!important;border:1px solid #ccc!important}
+    .result-card{background:#fff!important;border:1px solid #ddd!important}
+    .result-card.featured{background:#EFF6FF!important}
+    table{font-size:0.72rem!important;min-width:auto!important}
+    thead th,tbody td{padding:6px 8px!important}
+    .two-col{grid-template-columns:1fr 1fr!important}
+    .score-meter{transform:scale(0.85)}
+    @page{margin:12mm}
+  }
 </style>
 </head>
 <body>
@@ -470,7 +490,10 @@
   <!-- Amortization Table -->
   <section class="card animate-in">
     <div class="table-header"><h2><i class="fa-solid fa-table-list"></i> Amortization Schedule</h2>
-      <button class="btn btn-outline" id="toggleTableBtn"><i class="fa-solid fa-chevron-down"></i><span>Show All</span></button></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-outline pdf-hide" id="downloadPdfBtn" onclick="window.print()"><i class="fa-solid fa-file-pdf"></i><span>Download PDF</span></button>
+        <button class="btn btn-outline" id="toggleTableBtn"><i class="fa-solid fa-chevron-down"></i><span>Show All</span></button>
+      </div></div>
     <div class="table-scroll"><table><thead><tr><th>#</th><th>Payment</th><th>Principal</th><th>Interest</th><th>Balance</th></tr></thead>
       <tbody id="tableBody"><tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:32px;">Enter valid loan details</td></tr></tbody></table></div>
   </section>
