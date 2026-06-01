@@ -410,8 +410,16 @@
   </section>
 
   <!-- Results + AI Odds -->
-  <section class="card animate-in" id="resultsSection">
+  <section class="card animate-in" id="resultsSection" style="position:relative">
     <div class="error-block" id="errorBlock"><i class="fa-solid fa-triangle-exclamation"></i><span id="errorBlockText">Please check your inputs and try again.</span></div>
+
+    <!-- Locked overlay — shown until email verified -->
+    <div id="resultsLocked" style="display:flex;position:absolute;inset:0;background:rgba(255,255,255,0.85);z-index:5;border-radius:var(--radius-lg);flex-direction:column;align-items:center;justify-content:center;gap:12px;backdrop-filter:blur(6px)">
+      <i class="fa-solid fa-lock" style="font-size:2.5rem;color:var(--primary);opacity:0.6"></i>
+      <p style="font-weight:700;font-size:1rem;color:var(--text)">Unlock Your Full Results</p>
+      <p style="font-size:0.82rem;color:var(--text-muted);text-align:center;max-width:300px">Enter your email to see detailed charts, AI approval odds, and full amortization schedule.</p>
+      <button class="btn btn-primary" id="resultsUnlockBtn" style="margin-top:4px"><i class="fa-solid fa-unlock"></i> Unlock Results</button>
+    </div>
 
     <!-- AI Agent header above results -->
     <div style="text-align:center;margin-bottom:14px">
@@ -893,18 +901,28 @@ window.drawMainChart=drawMainChart;
 const STORED_EMAIL=localStorage.getItem('mtg_email');
 const STORED_PROVIDER=localStorage.getItem('mtg_provider');
 let emailUnlocked=!!STORED_EMAIL;
-// Google Client ID — replace with your own from https://console.cloud.google.com
+// Google Client ID — get yours at https://console.cloud.google.com/apis/credentials
 const GOOGLE_CLIENT_ID='';
 
 function saveAndUnlock(email,provider){
   localStorage.setItem('mtg_email',email);
   localStorage.setItem('mtg_provider',provider||'email');
-  // In production, also POST to your backend:
-  // fetch('/api/save-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,provider,page:location.href,ts:Date.now()})});
   console.log('[Email captured]',email,'via',provider||'email');
+  // POST to your backend in production:
+  // fetch('/api/leads',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,provider,page:location.href,ts:Date.now()})});
   emailUnlocked=true;
   hideEmailGate();
-  runCalc();
+  document.getElementById('resultsLocked').style.display='none';
+  // Refresh chart now that results are visible
+  setTimeout(function(){drawMainChart()},200);
+}
+
+function updateLockedUI(){
+  if(emailUnlocked){
+    document.getElementById('resultsLocked').style.display='none';
+  }else{
+    document.getElementById('resultsLocked').style.display='flex';
+  }
 }
 
 function showEmailGate(){
@@ -916,31 +934,44 @@ function hideEmailGate(){
   document.getElementById('emailGate').classList.remove('visible');
 }
 function renderGoogleBtn(){
-  const container=document.getElementById('googleBtn');if(!container)return;
-  if(GOOGLE_CLIENT_ID&&window.google&&google.accounts){
-    // Real Google Identity Services button
-    google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID,callback:handleGoogleCredential,
-      context:'signin',ux_mode:'popup',auto_select:false});
+  var container=document.getElementById('googleBtn');if(!container)return;
+  if(GOOGLE_CLIENT_ID&&window.google&&google.accounts&&google.accounts.id){
+    google.accounts.id.initialize({
+      client_id:GOOGLE_CLIENT_ID,
+      callback:handleGoogleCredential,
+      context:'signin',
+      ux_mode:'popup',
+      auto_select:true,
+      itp_support:true
+    });
     google.accounts.id.renderButton(container,{type:'standard',theme:'outline',size:'large',text:'continue_with',width:360});
-    google.accounts.id.prompt();
+    // Prompt browser to auto-select the user's signed-in Google account
+    google.accounts.id.prompt(function(notification){
+      if(notification.isNotDisplayed()||notification.isSkippedMoment()){
+        // Google One Tap didn't show — user can click the rendered button instead
+      }
+    });
   }else{
-    // Fallback: styled Google button that collects email
+    // Google button with manual email fallback
     container.innerHTML='<button class="google-btn" id="googleFallbackBtn"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Continue with Google</button>';
     document.getElementById('googleFallbackBtn').addEventListener('click',function(){
-      const name=prompt('Sign in with Google\n\nEnter your Gmail address:',STORED_EMAIL||'');
-      if(name&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(name))saveAndUnlock(name,'google');
+      var email=prompt('Sign in with Google\n\nEnter your Gmail address to unlock results:',STORED_EMAIL||'');
+      if(email&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))saveAndUnlock(email,'google');
     });
   }
 }
 function handleGoogleCredential(response){
   try{
-    // Decode JWT to extract email
-    const payload=JSON.parse(atob(response.credential.split('.')[1]));
+    // Decode the JWT credential — contains email, name, picture from Google
+    var payload=JSON.parse(atob(response.credential.split('.')[1]));
     if(payload.email)saveAndUnlock(payload.email,'google');
-  }catch(e){console.error('Google sign-in error:',e)}
+  }catch(e){console.error('Google sign-in decode error:',e)}
 }
+// Unlock button on the locked results overlay
+document.getElementById('resultsUnlockBtn').addEventListener('click',function(){showEmailGate()});
+// Manual email submit
 document.getElementById('emailGateSubmit').addEventListener('click',function(){
-  const email=document.getElementById('emailGateInput').value.trim();
+  var email=document.getElementById('emailGateInput').value.trim();
   if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){document.getElementById('emailGateInput').classList.add('error');return}
   document.getElementById('emailGateInput').classList.remove('error');
   saveAndUnlock(email,'email');
@@ -1010,13 +1041,13 @@ function renderResults(result){
 
 function runCalc(){
   if(!validateCalc()){elErrorBlock.classList.add('visible');elErrorText.textContent='Please check your inputs and try again.';elMonthly.textContent='$---';elTotInt.textContent='$---';elTotPay.textContent='$---';currentSchedule=[];extraSchedule=null;showAll=false;renderSchedule();updateToggleBtn();window._calcSchedule=[];drawMainChart();elExtraResult.style.display='none';return}
-  if(!emailUnlocked){elErrorBlock.classList.remove('visible');showEmailGate();return}
   elErrorBlock.classList.remove('visible');
   const amt=toNum(elLoanAmt.value),rate=parseFloat(elRate.value.trim()),term=parseInt(elTerm.value.trim(),10),type=getRepaymentType(),extraMo=toNum(elExtraMonthly.value)||0;
   try{
     const result=calcSchedule(amt,rate,term,type,0);currentSchedule=result.schedule;window._calcSchedule=currentSchedule;
-    renderResults(result);renderSchedule();updateToggleBtn();drawMainChart();
-    if(extraMo>0){const er=calcSchedule(amt,rate,term,type,extraMo);extraSchedule=er.schedule;window._extraSchedule=extraSchedule;const saved=result.totalInterest-er.totalInterest,tsm=currentSchedule.length-er.schedule.length,yrs=Math.floor(tsm/12),mos=tsm%12;elExtraSaved.textContent=fmtCur(Math.max(0,saved));elExtraTimeSaved.textContent=yrs>0?yrs+' yr '+mos+' mo':mos+' mo';const now=new Date();now.setMonth(now.getMonth()+er.schedule.length);elExtraNewPayoff.textContent=now.toLocaleDateString('en-US',{year:'numeric',month:'short'});elExtraResult.style.display='flex';drawMainChart()}
+    renderResults(result);renderSchedule();updateToggleBtn();
+    if(emailUnlocked)drawMainChart();
+    if(extraMo>0){const er=calcSchedule(amt,rate,term,type,extraMo);extraSchedule=er.schedule;window._extraSchedule=extraSchedule;const saved=result.totalInterest-er.totalInterest,tsm=currentSchedule.length-er.schedule.length,yrs=Math.floor(tsm/12),mos=tsm%12;elExtraSaved.textContent=fmtCur(Math.max(0,saved));elExtraTimeSaved.textContent=yrs>0?yrs+' yr '+mos+' mo':mos+' mo';const now=new Date();now.setMonth(now.getMonth()+er.schedule.length);elExtraNewPayoff.textContent=now.toLocaleDateString('en-US',{year:'numeric',month:'short'});elExtraResult.style.display='flex';if(emailUnlocked)drawMainChart()}
     else{elExtraResult.style.display='none';extraSchedule=null;window._extraSchedule=null}
   }catch(e){elErrorBlock.classList.add('visible');elErrorText.textContent='Calculation error. Please check your inputs.'}
 }
@@ -1218,8 +1249,9 @@ function calcRentBuy(){
 // ═══════════════ INIT ═══════════════
 elLoanAmt.value=fmtNumInp(elLoanAmt.value);
 updateSliderFromInput(elLoanAmt,elLoanSlider);updateSliderFromInput(elRate,elRateSlider);updateSliderFromInput(elTerm,elTermSlider);
-if(emailUnlocked)runCalc();
-setTimeout(function(){if(emailUnlocked){drawMainChart()}else{showEmailGate()}},300);
+runCalc();
+updateLockedUI();
+setTimeout(function(){if(emailUnlocked)drawMainChart()},300);
 window.addEventListener('resize',function(){if(emailUnlocked)drawMainChart()});
 document.getElementById('approvalCreditSlider').value=680;updateSliderPct(document.getElementById('approvalCreditSlider'));
 })();
