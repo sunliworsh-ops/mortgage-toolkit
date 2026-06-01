@@ -327,6 +327,32 @@
     @page{margin:12mm}
   }
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Home Mortgage Toolkit",
+  "url": "https://mortgagetoolkit.site/",
+  "description": "Free mortgage calculator with amortization schedule, affordability check, AI loan approval odds, and FHA vs VA vs Conventional comparison.",
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "All",
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+  "browserRequirements": "Requires JavaScript",
+  "featureList": ["Mortgage Payment Calculator", "Amortization Schedule", "Affordability Check", "Loan Comparison", "Rent vs Buy Analysis", "AI Loan Approval Odds"]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type":"Question","name":"How do I calculate my monthly mortgage payment?","acceptedAnswer":{"@type":"Answer","text":"Your monthly payment depends on loan amount, interest rate, and loan term. Use our free mortgage calculator to get instant results including full amortization schedule."}},
+    {"@type":"Question","name":"How much house can I afford?","acceptedAnswer":{"@type":"Answer","text":"Lenders use the 28/36 rule: 28% of income for housing, 36% for total debt. Use our affordability calculator for personalized estimates."}},
+    {"@type":"Question","name":"What credit score do I need for a mortgage?","acceptedAnswer":{"@type":"Answer","text":"Conventional loans require 620+. FHA loans accept 580+ with 3.5% down. VA loans have no official minimum. Try our AI loan approval tool."}},
+    {"@type":"Question","name":"FHA vs Conventional vs VA: which loan type is best?","acceptedAnswer":{"@type":"Answer","text":"FHA for lower credit/first-time buyers. Conventional for good credit with lower total cost. VA for veterans with 0% down and no PMI."}}
+  ]
+}
+</script>
 </head>
 <body>
 
@@ -667,6 +693,41 @@
 </div>
 
 </main>
+
+<!-- ── FAQ Section ── -->
+<section class="card animate-in" style="max-width:920px;width:100%;margin:0 auto 20px">
+  <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:20px"><i class="fa-solid fa-circle-question" style="color:var(--primary)"></i> Frequently Asked Questions</h2>
+
+  <div class="faq-item" style="margin-bottom:18px">
+    <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:4px">How do I calculate my monthly mortgage payment?</h3>
+    <p style="font-size:0.85rem;color:var(--text-secondary);line-height:1.7">Your monthly mortgage payment depends on the loan amount, interest rate, and loan term. For a fixed-rate mortgage, use the formula: M = P × [r(1+r)^n] / [(1+r)^n − 1], where P is the loan principal, r is the monthly interest rate, and n is the number of payments. Our <a href="#" onclick="document.querySelector('[data-tab=calculator]').click()" style="color:var(--primary)">free calculator</a> does this instantly, plus shows your full amortization schedule.</p>
+  </div>
+
+  <div class="faq-item" style="margin-bottom:18px">
+    <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:4px">What is the difference between equal payment and equal principal?</h3>
+    <p style="font-size:0.85rem;color:var(--text-secondary);line-height:1.7"><strong>Equal Payment ( amortized ):</strong> Your monthly payment stays the same for the entire loan term. Early payments are mostly interest; later payments are mostly principal. <strong>Equal Principal:</strong> You pay the same amount toward principal each month, so your total payment decreases over time as interest shrinks. Equal principal saves you more total interest but starts with higher payments.</p>
+  </div>
+
+  <div class="faq-item" style="margin-bottom:18px">
+    <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:4px">How much house can I afford?</h3>
+    <p style="font-size:0.85rem;color:var(--text-secondary);line-height:1.7">Lenders typically use the 28/36 rule: no more than 28% of your gross monthly income should go toward housing costs, and no more than 36% toward total debt (housing + car loans + credit cards). Use our <a href="#" onclick="document.querySelector('[data-tab=affordability]').click()" style="color:var(--primary)">affordability calculator</a> to get your personalized estimate.</p>
+  </div>
+
+  <div class="faq-item" style="margin-bottom:18px">
+    <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:4px">What credit score do I need for a mortgage?</h3>
+    <p style="font-size:0.85rem;color:var(--text-secondary);line-height:1.7">Conventional loans typically require a 620+ credit score. FHA loans may accept scores as low as 580 with 3.5% down. VA loans have no official minimum, but most lenders want 580–620. Try our <a href="#" onclick="document.querySelector('[data-tab=calculator]').click();setTimeout(function(){document.getElementById('approvalCredit').focus()},300)" style="color:var(--primary)">AI loan approval tool</a> to see your estimated approval odds.</p>
+  </div>
+
+  <div class="faq-item" style="margin-bottom:18px">
+    <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:4px">What is included in a mortgage payment besides principal and interest?</h3>
+    <p style="font-size:0.85rem;color:var(--text-secondary);line-height:1.7">Your total monthly payment (PITI) includes <strong>Principal</strong>, <strong>Interest</strong>, <strong>Property Taxes</strong>, and <strong>Homeowners Insurance</strong>. If your down payment is less than 20%, you'll also pay <strong>Private Mortgage Insurance (PMI)</strong>. Some properties also have <strong>HOA fees</strong>. Our <a href="#" onclick="document.querySelector('[data-tab=fullcost]').click()" style="color:var(--primary)">full cost calculator</a> shows your true monthly payment breakdown.</p>
+  </div>
+
+  <div class="faq-item" style="margin-bottom:8px">
+    <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:4px">FHA vs Conventional vs VA: which loan type is best?</h3>
+    <p style="font-size:0.85rem;color:var(--text-secondary);line-height:1.7">FHA loans are ideal for first-time buyers with lower credit scores (580+) and small down payments (3.5%). Conventional loans offer lower total costs if you have good credit (620+) and at least 5% down. VA loans are the best deal for eligible veterans and service members — 0% down, no PMI, and competitive rates. <a href="#" onclick="document.querySelector('[data-tab=compare]').click()" style="color:var(--primary)">Compare all three side-by-side</a>.</p>
+  </div>
+</section>
 
 <!-- ── Email Gate Overlay ── -->
 <div class="email-gate" id="emailGate">
