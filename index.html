@@ -68,21 +68,21 @@
   @media(max-width:640px){.header h1{font-size:1.5rem}.header h1 i{font-size:1.5rem}.header{padding:24px 14px 20px}}
 
   /* ── Tab Nav ── */
-  .tab-nav{display:flex;gap:6px;background:var(--surface);border-radius:var(--radius-lg);
-    padding:8px;box-shadow:var(--shadow-lg);margin-bottom:24px;overflow-x:auto;
-    -webkit-overflow-scrolling:touch;max-width:100%;position:sticky;top:8px;z-index:10}
-  .tab-btn{flex-shrink:0;padding:14px 20px;border:none;background:transparent;
-    border-radius:var(--radius);font-size:0.85rem;font-weight:700;font-family:'Inter',system-ui,sans-serif;
+  .tab-nav{display:flex;gap:4px;background:var(--surface);border-radius:var(--radius);
+    padding:4px;box-shadow:var(--shadow-md);margin-bottom:20px;overflow-x:auto;
+    -webkit-overflow-scrolling:touch;max-width:100%;position:sticky;top:4px;z-index:10}
+  .tab-btn{flex-shrink:0;padding:8px 14px;border:none;background:transparent;
+    border-radius:var(--radius-sm);font-size:0.8rem;font-weight:700;font-family:'Inter',system-ui,sans-serif;
     color:var(--text-muted);cursor:pointer;transition:all 0.2s ease;
-    display:flex;flex-direction:column;align-items:center;gap:6px;white-space:nowrap;min-width:80px}
-  .tab-btn i{font-size:1.35rem;transition:transform 0.2s}
-  .tab-btn:hover{color:var(--text);background:#F9FAFB;transform:translateY(-1px)}
+    display:flex;align-items:center;gap:5px;white-space:nowrap}
+  .tab-btn i{font-size:0.95rem;transition:transform 0.2s}
+  .tab-btn:hover{color:var(--text);background:#F9FAFB;}
   .tab-btn:hover i{transform:scale(1.1)}
-  .tab-btn.active{background:linear-gradient(135deg,var(--primary) 0%,var(--accent) 100%);color:#fff;box-shadow:0 4px 12px rgba(59,130,246,0.35)}
-  .tab-btn .tab-badge{font-size:0.65rem;font-weight:700;background:rgba(255,255,255,0.25);padding:2px 8px;border-radius:10px;margin-top:-2px;letter-spacing:0.03em}
+  .tab-btn.active{background:linear-gradient(135deg,var(--primary) 0%,var(--accent) 100%);color:#fff;box-shadow:0 2px 8px rgba(59,130,246,0.3)}
+  .tab-btn .tab-badge{font-size:0.6rem;font-weight:700;background:rgba(255,255,255,0.25);padding:1px 6px;border-radius:8px;letter-spacing:0.03em}
   .tab-btn.active .tab-badge{background:rgba(255,255,255,0.3)}
-  @media(max-width:768px){.tab-btn{padding:10px 12px;font-size:0.73rem;min-width:60px;gap:3px}.tab-btn i{font-size:1.1rem}.tab-btn .tab-badge{font-size:0.6rem;padding:1px 6px}}
-  @media(max-width:480px){.tab-btn{padding:8px 10px;font-size:0.68rem;min-width:50px}.tab-btn i{font-size:0.95rem}}
+  @media(max-width:768px){.tab-btn{padding:6px 10px;font-size:0.7rem}.tab-btn i{font-size:0.85rem}.tab-btn .tab-badge{font-size:0.55rem;padding:1px 4px}}
+  @media(max-width:480px){.tab-btn{padding:5px 8px;font-size:0.65rem}.tab-btn i{font-size:0.75rem}}
 
   /* ── Container ── */
   .container{width:100%;max-width:920px;display:flex;flex-direction:column;gap:20px}
@@ -534,6 +534,54 @@
 
 <!-- ═══════════════════ TAB 2: AFFORDABILITY ═══════════════════ -->
 <div class="tab-panel" id="panel-affordability">
+  <!-- AI Loan Approval Odds (moved to top) -->
+  <section class="card animate-in" id="resultsSection">
+    <div style="text-align:center;margin-bottom:16px">
+      <span class="ai-badge" style="font-size:0.9rem;padding:7px 18px"><i class="fa-solid fa-robot"></i> Powered by AI Agent</span>
+    </div>
+    <h2 style="font-size:1.3rem;font-weight:900;color:#111827;margin-bottom:4px;text-align:center">Loan Approval Odds</h2>
+    <p style="font-size:0.9rem;color:#374151;font-weight:700;text-align:center;margin-bottom:18px">10-Factor AI Assessment</p>
+    <div class="two-col">
+      <div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-group"><label>Credit Score</label><div class="input-wrapper"><input type="number" id="approvalCredit" value="680" min="300" max="850" step="1"></div></div>
+          <div class="form-group"><label>Credit History Age</label><div class="input-wrapper"><input type="number" id="approvalCreditAge" value="8" min="0" max="50" step="1"><span class="input-suffix">yr</span></div></div>
+        </div>
+        <input type="range" id="approvalCreditSlider" min="300" max="850" value="680" step="5" style="--pct:45%">
+        <div class="slider-labels"><span>300</span><span>850</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-group"><label>Employment</label>
+            <select id="approvalEmploy"><option value="ft">Full-time (2+ yr)</option><option value="ft1">Full-time (1-2 yr)</option><option value="self">Self-employed</option><option value="pt">Part-time / Contract</option></select></div>
+          <div class="form-group"><label>Property Type</label>
+            <select id="approvalPropType"><option value="primary">Primary Residence</option><option value="second">Second Home</option><option value="invest">Investment Property</option></select></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-group"><label>Down Payment</label><div class="input-wrapper"><input type="number" id="approvalDown" value="20" min="0" max="100" step="1"><span class="input-suffix">%</span></div></div>
+          <div class="form-group"><label>Loan Type</label><select id="approvalType"><option value="conventional">Conventional</option><option value="fha">FHA</option><option value="va">VA</option></select></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-group"><label>Cash Reserves (after closing)</label><div class="input-wrapper"><input type="number" id="approvalReserves" value="6" min="0" max="60" step="1"><span class="input-suffix">mo</span></div></div>
+          <div class="form-group"><label>Recent Inquiries (12 mo)</label><div class="input-wrapper"><input type="number" id="approvalInquiries" value="1" min="0" max="20" step="1"></div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-group"><label>Monthly Debts</label><div class="input-wrapper"><span class="input-prefix">$</span><input type="text" id="approvalDebts" class="has-prefix" value="500" inputmode="numeric" autocomplete="off"></div></div>
+          <div class="form-group"><label>Monthly Income</label><div class="input-wrapper"><span class="input-prefix">$</span><input type="text" id="approvalIncome" class="has-prefix" value="8,333" inputmode="numeric" autocomplete="off"></div></div>
+        </div>
+        <div class="form-group"><label>Bankruptcy / Foreclosure History</label>
+          <select id="approvalAdverse"><option value="none">None</option><option value="bk7_old">Bankruptcy discharged &gt;4 yr ago</option><option value="bk7_recent">Bankruptcy discharged 2-4 yr ago</option><option value="fc_recent">Foreclosure &lt;7 yr ago</option></select></div>
+      </div>
+      <div class="score-meter" id="scoreMeter">
+        <div class="score-circle">
+          <svg viewBox="0 0 140 140"><circle class="bg" cx="70" cy="70" r="60"/><circle class="fill" id="scoreCircle" cx="70" cy="70" r="60" stroke="#3B82F6" stroke-dasharray="377" stroke-dashoffset="150"/></svg>
+          <div class="score-text"><div class="big" id="scorePercent">—</div><div class="small">Approval Odds</div></div>
+        </div>
+        <div class="score-factors" id="scoreFactors"></div>
+        <div class="insight-box" id="scoreInsight" style="margin-top:8px;font-size:0.82rem"></div>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="calcApprovalBtn" style="margin-top:14px"><i class="fa-solid fa-calculator"></i> Refresh Approval Score</button>
+  </section>
+
   <section class="card animate-in">
     <h2 style="font-size:1.15rem;font-weight:700;margin-bottom:18px"><i class="fa-solid fa-magnifying-glass-dollar" style="color:var(--primary)"></i> Purchase Power &amp; DTI Analysis</h2>
     <div class="two-col">
@@ -582,53 +630,6 @@
     </div>
   </section>
 
-  <!-- AI Loan Approval Odds -->
-  <section class="card animate-in" id="resultsSection">
-    <div style="text-align:center;margin-bottom:16px">
-      <span class="ai-badge" style="font-size:0.9rem;padding:7px 18px"><i class="fa-solid fa-robot"></i> Powered by AI Agent</span>
-    </div>
-    <h2 style="font-size:1.3rem;font-weight:900;color:#111827;margin-bottom:4px;text-align:center">Loan Approval Odds</h2>
-    <p style="font-size:0.9rem;color:#374151;font-weight:700;text-align:center;margin-bottom:18px">10-Factor AI Assessment</p>
-    <div class="two-col">
-      <div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div class="form-group"><label>Credit Score</label><div class="input-wrapper"><input type="number" id="approvalCredit" value="680" min="300" max="850" step="1"></div></div>
-          <div class="form-group"><label>Credit History Age</label><div class="input-wrapper"><input type="number" id="approvalCreditAge" value="8" min="0" max="50" step="1"><span class="input-suffix">yr</span></div></div>
-        </div>
-        <input type="range" id="approvalCreditSlider" min="300" max="850" value="680" step="5" style="--pct:45%">
-        <div class="slider-labels"><span>300</span><span>850</span></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div class="form-group"><label>Employment</label>
-            <select id="approvalEmploy"><option value="ft">Full-time (2+ yr)</option><option value="ft1">Full-time (1-2 yr)</option><option value="self">Self-employed</option><option value="pt">Part-time / Contract</option></select></div>
-          <div class="form-group"><label>Property Type</label>
-            <select id="approvalPropType"><option value="primary">Primary Residence</option><option value="second">Second Home</option><option value="invest">Investment Property</option></select></div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div class="form-group"><label>Down Payment</label><div class="input-wrapper"><input type="number" id="approvalDown" value="20" min="0" max="100" step="1"><span class="input-suffix">%</span></div></div>
-          <div class="form-group"><label>Loan Type</label><select id="approvalType"><option value="conventional">Conventional</option><option value="fha">FHA</option><option value="va">VA</option></select></div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div class="form-group"><label>Cash Reserves (after closing)</label><div class="input-wrapper"><input type="number" id="approvalReserves" value="6" min="0" max="60" step="1"><span class="input-suffix">mo</span></div></div>
-          <div class="form-group"><label>Recent Inquiries (12 mo)</label><div class="input-wrapper"><input type="number" id="approvalInquiries" value="1" min="0" max="20" step="1"></div></div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div class="form-group"><label>Monthly Debts</label><div class="input-wrapper"><span class="input-prefix">$</span><input type="text" id="approvalDebts" class="has-prefix" value="500" inputmode="numeric" autocomplete="off"></div></div>
-          <div class="form-group"><label>Monthly Income</label><div class="input-wrapper"><span class="input-prefix">$</span><input type="text" id="approvalIncome" class="has-prefix" value="8,333" inputmode="numeric" autocomplete="off"></div></div>
-        </div>
-        <div class="form-group"><label>Bankruptcy / Foreclosure History</label>
-          <select id="approvalAdverse"><option value="none">None</option><option value="bk7_old">Bankruptcy discharged &gt;4 yr ago</option><option value="bk7_recent">Bankruptcy discharged 2-4 yr ago</option><option value="fc_recent">Foreclosure &lt;7 yr ago</option></select></div>
-      </div>
-      <div class="score-meter" id="scoreMeter">
-        <div class="score-circle">
-          <svg viewBox="0 0 140 140"><circle class="bg" cx="70" cy="70" r="60"/><circle class="fill" id="scoreCircle" cx="70" cy="70" r="60" stroke="#3B82F6" stroke-dasharray="377" stroke-dashoffset="150"/></svg>
-          <div class="score-text"><div class="big" id="scorePercent">—</div><div class="small">Approval Odds</div></div>
-        </div>
-        <div class="score-factors" id="scoreFactors"></div>
-        <div class="insight-box" id="scoreInsight" style="margin-top:8px;font-size:0.82rem"></div>
-      </div>
-    </div>
-    <button class="btn btn-primary" id="calcApprovalBtn" style="margin-top:14px"><i class="fa-solid fa-calculator"></i> Refresh Approval Score</button>
-  </section>
 </div>
 
 <!-- ═══════════════════ TAB 3: FULL COST ═══════════════════ -->
@@ -764,7 +765,10 @@
     <a onclick="openModal('contact')">Contact</a>
     <a onclick="openModal('disclaimer')">Disclaimer</a>
     <a href="/blog/how-to-calculate-mortgage-payment.html">Blog: Payment Guide</a>
-    <a href="/blog/fha-vs-conventional-vs-va.html">Blog: FHA vs Conventional vs VA</a>
+    <a href="/blog/fha-vs-conventional-vs-va.html">FHA vs Conventional vs VA</a>
+    <a href="/blog/how-much-house-can-i-afford.html">How Much Can I Afford</a>
+    <a href="/blog/pmi-calculator-when-does-it-end.html">PMI Calculator Guide</a>
+    <a href="/blog/rent-vs-buy-calculator-2026.html">Rent vs Buy Comparison</a>
   </div>
   <p>&copy; 2026 Home Mortgage Toolkit. All tools are for reference only.</p>
 </footer>
